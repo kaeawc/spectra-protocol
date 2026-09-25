@@ -34,7 +34,7 @@ func ResultSchemaName(op Operation) (string, bool) {
 // SupportedResultSchemaVersion returns the supported version for a known schema.
 func SupportedResultSchemaVersion(name string) (int, bool) {
 	switch name {
-	case SchemaInspect, SchemaSnapshot:
+	case SchemaInspect, SchemaSnapshot, SchemaCapabilities:
 		return 1, true
 	}
 	return 0, false

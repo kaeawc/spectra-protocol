@@ -72,6 +72,15 @@ func TestCases(t *testing.T) {
 				if !tc.Valid && tc.ErrorCode != "" && protocol.CodeOf(got) != tc.ErrorCode {
 					t.Fatalf("code %s, want %s: %v", protocol.CodeOf(got), tc.ErrorCode, got)
 				}
+			case "spectra_capabilities":
+				decoded, err := protocol.DecodeSpectraCapabilities(tc.Input)
+				got = err
+				if got == nil && tc.Operation != "" {
+					_, got = decoded.ResultSchemaFor(tc.Operation)
+				}
+				if !tc.Valid && tc.ErrorCode != "" && protocol.CodeOf(got) != tc.ErrorCode {
+					t.Fatalf("code %s, want %s: %v", protocol.CodeOf(got), tc.ErrorCode, got)
+				}
 			default:
 				t.Fatalf("unknown kind %q", tc.Kind)
 			}
@@ -80,7 +89,7 @@ func TestCases(t *testing.T) {
 			}
 		})
 	}
-	for _, kind := range []string{"request", "response", "manifest", "result"} {
+	for _, kind := range []string{"request", "response", "manifest", "result", "spectra_capabilities"} {
 		selected, err := CasesOf(kind)
 		if err != nil || len(selected) == 0 {
 			t.Fatalf("CasesOf(%q): %d, %v", kind, len(selected), err)

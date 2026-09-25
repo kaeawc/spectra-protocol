@@ -22,7 +22,7 @@ type Case struct {
 //go:embed testdata/*.json
 var fixtures embed.FS
 
-var files = []string{"requests.json", "responses.json", "manifests.json", "results.json"}
+var files = []string{"requests.json", "responses.json", "manifests.json", "results.json", "spectra_capabilities.json"}
 
 // Cases loads all embedded conformance fixtures in stable file order.
 func Cases() ([]Case, error) {

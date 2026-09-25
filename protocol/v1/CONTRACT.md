@@ -10,4 +10,12 @@ A capability manifest advertises `protocol_versions`, `spectra_version`, `agent_
 
 Diagnostic results wrap `schema`, `spectra_version`, and non-null JSON `data`. `inspect` expects `spectra.inspect` version 1; `snapshot.create` expects `spectra.snapshot` version 1. Unknown or mismatched schemas return `incompatible_spectra`. A failure response, missing data, or invalid result JSON returns `invalid_request`. Health results contain `capabilities`, which must pass manifest validation. These envelopes do not define transport, authentication, execution, or local agent policy.
 
-The four embedded JSON fixture arrays under `conformance/testdata` are normative interoperability cases. A request case with `valid: true` and `error_code: "unsupported_operation"` passes envelope validation but requires that code from downstream dispatch. A manifest case lacking `v1` passes structural validation but fails negotiation. Consumers should run all cases and apply their paired requests when validating responses.
+The embedded JSON fixture arrays under `conformance/testdata` are normative interoperability cases. A request case with `valid: true` and `error_code: "unsupported_operation"` passes envelope validation but requires that code from downstream dispatch. A manifest case lacking `v1` passes structural validation but fails negotiation. Consumers should run all cases and apply their paired requests when validating responses.
+
+## Spectra capabilities document
+
+`SpectraCapabilities` models the JSON emitted by `spectra capabilities --json`; its `schema` is `spectra.capabilities` version 1, bounded by `MaxCapabilitiesBytes` (1 MiB).
+It contains the Spectra version, OS, architecture, and named `SpectraInterface` entries with argv, text or JSON output, and an optional result schema.
+Validation requires non-empty platform/version fields, unique well-formed interface names, output-appropriate schemas, and exactly one JSON `capabilities` interface declaring this schema.
+Every `Validate` failure uses `incompatible_spectra`, because a nonconforming document identifies an incompatible Spectra.
+`ResultSchemaFor(op)` requires the mapped interface and the operation's supported result schema name and version; unmapped operations use `unsupported_operation`, while absent or mismatched interfaces use `incompatible_spectra`.

@@ -21,7 +21,7 @@ execution primitives.
 
 ## Packages
 
-- `protocol/v1`: wire contract and conformance fixtures.
+- `protocol/v1`: wire contract and conformance fixtures; Spectra core emits `SpectraCapabilities` and spectra-proxy consumes it as the compatibility source of truth.
 - `release/v1`: signed release metadata.
 - `cmd/spectra-release`: release tooling.
 
