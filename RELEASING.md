@@ -10,6 +10,7 @@
    ```
 
 5. Push the tag: `git push origin vX.Y.Z`.
+   Spectra core pins `cmd/spectra-release` to a specific protocol tag with `go run github.com/kaeawc/spectra-protocol/cmd/spectra-release@vX.Y.Z` (never `@latest` or `@main`), so cutting a protocol release also requires bumping that pin in Spectra core's workflow.
 6. Verify publication:
 
    ```sh

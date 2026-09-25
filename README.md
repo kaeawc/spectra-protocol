@@ -19,6 +19,14 @@ import "github.com/kaeawc/spectra-protocol/protocol/v1"
 This package has no transport, authentication, installation, or command-
 execution primitives.
 
+## Packages
+
+- `protocol/v1`: wire contract and conformance fixtures.
+- `release/v1`: signed release metadata.
+- `cmd/spectra-release`: release tooling.
+
+The module remains standard-library only.
+
 ## Versioning
 
 Release the Go module with semantic version tags (`vX.Y.Z`). While the module
