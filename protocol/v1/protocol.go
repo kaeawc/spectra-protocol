@@ -1,12 +1,10 @@
-// Package v1 defines the versioned, transport-neutral contract between
-// Spectra and Spectra Remote. It deliberately contains no transport,
-// authentication, installation, or command-execution primitives.
+// Package v1 defines the versioned, transport-neutral Spectra diagnostic contract.
 package v1
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
-	"strings"
 )
 
 // Version identifies this protocol major version.
@@ -21,18 +19,36 @@ const (
 	OperationSnapshotCreate Operation = "snapshot.create"
 )
 
-// CapabilityManifest tells a controller exactly which typed operations a
-// target supports. A controller must not infer support from a version alone.
-type CapabilityManifest struct {
-	ProtocolVersion string      `json:"protocol_version"`
-	SpectraVersion  string      `json:"spectra_version"`
-	AgentVersion    string      `json:"agent_version"`
-	Operations      []Operation `json:"operations"`
+var errUnsupportedProtocolVersion = errors.New("unsupported protocol version")
+
+func validOperation(op Operation) bool {
+	s := string(op)
+	if len(s) == 0 || len(s) > 64 || s[0] < 'a' || s[0] > 'z' {
+		return false
+	}
+	for i := 1; i < len(s); i++ {
+		c := s[i]
+		if !(c >= 'a' && c <= 'z' || c >= '0' && c <= '9' || c == '_' || c == '.') {
+			return false
+		}
+	}
+	return true
 }
 
-// Request is one typed diagnostic request. Params has the schema for
-// Operation; it is never interpreted as an executable command or argument
-// vector.
+func validRequestID(id string) bool {
+	if len(id) == 0 || len(id) > MaxRequestIDLen {
+		return false
+	}
+	for i := 0; i < len(id); i++ {
+		c := id[i]
+		if !(c >= 'A' && c <= 'Z' || c >= 'a' && c <= 'z' || c >= '0' && c <= '9' || c == '.' || c == '_' || c == ':' || c == '-') {
+			return false
+		}
+	}
+	return true
+}
+
+// Request is one typed diagnostic request.
 type Request struct {
 	ProtocolVersion string          `json:"protocol_version"`
 	RequestID       string          `json:"request_id"`
@@ -41,26 +57,44 @@ type Request struct {
 	Params          json.RawMessage `json:"params,omitempty"`
 }
 
-// Validate checks invariants common to every request. Operation-specific
-// validation belongs to the target agent, which owns its local policy.
+// Validate checks the request envelope; operation-specific policy belongs to the agent.
 func (r Request) Validate() error {
 	if r.ProtocolVersion != Version {
-		return fmt.Errorf("protocol version %q is not supported", r.ProtocolVersion)
+		return fmt.Errorf("protocol version %q: %w", r.ProtocolVersion, errUnsupportedProtocolVersion)
 	}
-	if strings.TrimSpace(r.RequestID) == "" {
-		return fmt.Errorf("request id is required")
+	if !validRequestID(r.RequestID) {
+		return fmt.Errorf("invalid request_id")
 	}
-	if r.Operation == "" {
-		return fmt.Errorf("operation is required")
+	if !validOperation(r.Operation) {
+		return fmt.Errorf("invalid operation")
 	}
-	if r.TimeoutMS < 0 {
-		return fmt.Errorf("timeout_ms must not be negative")
+	if r.TimeoutMS < 0 || r.TimeoutMS > MaxTimeoutMS {
+		return fmt.Errorf("invalid timeout_ms")
+	}
+	if len(r.Params) > 0 {
+		var obj map[string]json.RawMessage
+		if err := json.Unmarshal(r.Params, &obj); err != nil {
+			return fmt.Errorf("invalid params: %w", err)
+		}
+		if obj == nil {
+			return fmt.Errorf("params must be a JSON object")
+		}
 	}
 	return nil
 }
 
-// Response is returned for every request. Error is a safe, operator-facing
-// failure message; implementations must not put credentials in it.
+// RequestErrorCode maps request validation failures to wire error codes; nil maps to an empty code.
+func RequestErrorCode(err error) ErrorCode {
+	if err == nil {
+		return ""
+	}
+	if errors.Is(err, errUnsupportedProtocolVersion) {
+		return CodeUnsupportedProtocolVersion
+	}
+	return CodeInvalidRequest
+}
+
+// Response is returned for every request.
 type Response struct {
 	ProtocolVersion string          `json:"protocol_version"`
 	RequestID       string          `json:"request_id"`
@@ -68,10 +102,41 @@ type Response struct {
 	Error           *Error          `json:"error,omitempty"`
 }
 
+// Validate checks the response envelope and its success or failure shape.
+func (r Response) Validate() error {
+	if r.ProtocolVersion != Version {
+		return fmt.Errorf("protocol version %q: %w", r.ProtocolVersion, errUnsupportedProtocolVersion)
+	}
+	if (len(r.Result) == 0) == (r.Error == nil) {
+		return fmt.Errorf("response must contain exactly one of result or error")
+	}
+	if r.Error != nil {
+		if err := r.Error.Validate(); err != nil {
+			return fmt.Errorf("response error: %w", err)
+		}
+		return nil
+	}
+	if !validNonNullJSON(r.Result) {
+		return fmt.Errorf("result must be non-null JSON")
+	}
+	return nil
+}
+
+// ValidateFor checks the response and requires a non-empty matching request ID.
+func (r Response) ValidateFor(req Request) error {
+	if err := r.Validate(); err != nil {
+		return fmt.Errorf("response: %w", err)
+	}
+	if r.RequestID == "" || r.RequestID != req.RequestID {
+		return fmt.Errorf("response request_id does not match request")
+	}
+	return nil
+}
+
 // Error is a stable failure shape for callers.
 type Error struct {
-	Code    string `json:"code"`
-	Message string `json:"message"`
+	Code    ErrorCode `json:"code"`
+	Message string    `json:"message"`
 }
 
 // HealthResult is the result payload for OperationHealth.
