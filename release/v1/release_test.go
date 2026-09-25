@@ -216,8 +216,12 @@ func TestVerificationOrderAndBinding(t *testing.T) {
 		{"trailing signature data", append(append([]byte(nil), signature...), []byte(" garbage")...)},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			if _, err := Verify(valid, tc.raw, []TrustedKey{key}); !errors.Is(err, ErrBadSignature) {
+			_, err := Verify(valid, tc.raw, []TrustedKey{key})
+			if !errors.Is(err, ErrBadSignature) {
 				t.Fatalf("signature strict decode: %v", err)
+			}
+			if errors.Is(err, ErrInvalidManifest) {
+				t.Fatalf("signature decode error classified as invalid manifest: %v", err)
 			}
 		})
 	}

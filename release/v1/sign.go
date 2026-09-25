@@ -7,6 +7,7 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 )
@@ -60,7 +61,7 @@ func decodeStrict(data []byte, target any) error {
 	var extra any
 	if err := dec.Decode(&extra); err != io.EOF {
 		if err == nil {
-			return fmt.Errorf("trailing JSON value: %w", ErrInvalidManifest)
+			return errors.New("trailing JSON value")
 		}
 		return fmt.Errorf("trailing JSON data: %w", err)
 	}

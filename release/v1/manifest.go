@@ -23,8 +23,10 @@ var (
 	ErrBadSignature        = errors.New("bad release signature")
 	ErrInvalidManifest     = errors.New("invalid release manifest")
 	ErrUnsupportedPlatform = errors.New("unsupported release platform")
-	errArtifactMismatch    = errors.New("artifact digest or size mismatch")
 )
+
+// ErrArtifactMismatch indicates that an artifact's size or digest does not match its manifest.
+var ErrArtifactMismatch = errors.New("artifact digest or size mismatch")
 
 type Artifact struct {
 	OS     string `json:"os"`
@@ -130,10 +132,10 @@ func VerifyArtifactDigest(r io.Reader, a Artifact) error {
 		return fmt.Errorf("read artifact: %w", err)
 	}
 	if n != a.Size {
-		return fmt.Errorf("artifact size %d, expected %d: %w", n, a.Size, errArtifactMismatch)
+		return fmt.Errorf("artifact size %d, expected %d: %w", n, a.Size, ErrArtifactMismatch)
 	}
 	if subtle.ConstantTimeCompare(h.Sum(nil), want) != 1 {
-		return fmt.Errorf("artifact sha256: %w", errArtifactMismatch)
+		return fmt.Errorf("artifact sha256: %w", ErrArtifactMismatch)
 	}
 	return nil
 }
