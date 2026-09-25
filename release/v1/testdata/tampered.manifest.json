@@ -1,0 +1,1 @@
+{"schema":"spectra.release/1","product":"spectra","version":"v1.2.4","published_at":"2026-09-24T00:00:00Z","key_id":"8552dd0ec84ef53d","capabilities_schema_version":1,"artifacts":[{"os":"darwin","arch":"arm64","path":"spectra-darwin-arm64.tar.gz","sha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","size":123,"format":"tar.gz"}]}
