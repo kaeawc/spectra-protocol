@@ -15,6 +15,11 @@ func TestDecodeSpectraCapabilities(t *testing.T) {
 	if _, err := decoded.ResultSchemaFor(OperationHealth); CodeOf(err) != CodeUnsupportedOperation {
 		t.Fatalf("health error = %v", err)
 	}
+	for _, op := range []Operation{OperationProcessList, OperationJVMList} {
+		if _, err := decoded.ResultSchemaFor(op); CodeOf(err) != CodeUnsupportedOperation {
+			t.Fatalf("%s error = %v", op, err)
+		}
+	}
 	if _, err := DecodeSpectraCapabilities(append(data, []byte("garbage")...)); CodeOf(err) != CodeIncompatibleSpectra {
 		t.Fatalf("trailing data error = %v", err)
 	}

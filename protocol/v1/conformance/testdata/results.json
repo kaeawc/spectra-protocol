@@ -166,5 +166,249 @@
     "valid": false,
     "error_code": "incompatible_spectra",
     "operation": "future.operation"
+  },
+  {
+    "name": "process list result",
+    "kind": "result",
+    "input": {
+      "protocol_version": "v1",
+      "request_id": "req-1",
+      "result": {
+        "schema": {
+          "name": "spectra.process.list",
+          "version": 1
+        },
+        "spectra_version": "1.0",
+        "data": {
+          "sampled_at": "2026-11-24T10:00:00.123456Z",
+          "processes": [
+            {
+              "pid": 1,
+              "command": "launchd",
+              "role": "system"
+            }
+          ]
+        }
+      }
+    },
+    "valid": true,
+    "operation": "process.list"
+  },
+  {
+    "name": "process list without sampled_at",
+    "kind": "result",
+    "input": {
+      "protocol_version": "v1",
+      "request_id": "req-1",
+      "result": {
+        "schema": {
+          "name": "spectra.process.list",
+          "version": 1
+        },
+        "spectra_version": "1.0",
+        "data": {
+          "processes": []
+        }
+      }
+    },
+    "valid": true,
+    "operation": "process.list"
+  },
+  {
+    "name": "jvm list result",
+    "kind": "result",
+    "input": {
+      "protocol_version": "v1",
+      "request_id": "req-1",
+      "result": {
+        "schema": {
+          "name": "spectra.jvm.list",
+          "version": 1
+        },
+        "spectra_version": "1.0",
+        "data": {
+          "jvms": [
+            {
+              "pid": 4242,
+              "main_class": "org.gradle.launcher.daemon.bootstrap.GradleDaemon"
+            }
+          ]
+        }
+      }
+    },
+    "valid": true,
+    "operation": "jvm.list"
+  },
+  {
+    "name": "jvm list empty",
+    "kind": "result",
+    "input": {
+      "protocol_version": "v1",
+      "request_id": "req-1",
+      "result": {
+        "schema": {
+          "name": "spectra.jvm.list",
+          "version": 1
+        },
+        "spectra_version": "1.0",
+        "data": {
+          "jvms": []
+        }
+      }
+    },
+    "valid": true,
+    "operation": "jvm.list"
+  },
+  {
+    "name": "process list missing processes",
+    "kind": "result",
+    "input": {
+      "protocol_version": "v1",
+      "request_id": "req-1",
+      "result": {
+        "schema": {
+          "name": "spectra.process.list",
+          "version": 1
+        },
+        "spectra_version": "1.0",
+        "data": {
+          "sampled_at": "2026-11-24T10:00:00Z"
+        }
+      }
+    },
+    "valid": false,
+    "error_code": "invalid_request",
+    "operation": "process.list"
+  },
+  {
+    "name": "process list null processes",
+    "kind": "result",
+    "input": {
+      "protocol_version": "v1",
+      "request_id": "req-1",
+      "result": {
+        "schema": {
+          "name": "spectra.process.list",
+          "version": 1
+        },
+        "spectra_version": "1.0",
+        "data": {
+          "processes": null
+        }
+      }
+    },
+    "valid": false,
+    "error_code": "invalid_request",
+    "operation": "process.list"
+  },
+  {
+    "name": "process list bare array data",
+    "kind": "result",
+    "input": {
+      "protocol_version": "v1",
+      "request_id": "req-1",
+      "result": {
+        "schema": {
+          "name": "spectra.process.list",
+          "version": 1
+        },
+        "spectra_version": "1.0",
+        "data": [
+          {
+            "pid": 1
+          }
+        ]
+      }
+    },
+    "valid": false,
+    "error_code": "invalid_request",
+    "operation": "process.list"
+  },
+  {
+    "name": "process list bad sampled_at",
+    "kind": "result",
+    "input": {
+      "protocol_version": "v1",
+      "request_id": "req-1",
+      "result": {
+        "schema": {
+          "name": "spectra.process.list",
+          "version": 1
+        },
+        "spectra_version": "1.0",
+        "data": {
+          "sampled_at": 1732442400,
+          "processes": []
+        }
+      }
+    },
+    "valid": false,
+    "error_code": "invalid_request",
+    "operation": "process.list"
+  },
+  {
+    "name": "jvm list object jvms",
+    "kind": "result",
+    "input": {
+      "protocol_version": "v1",
+      "request_id": "req-1",
+      "result": {
+        "schema": {
+          "name": "spectra.jvm.list",
+          "version": 1
+        },
+        "spectra_version": "1.0",
+        "data": {
+          "jvms": {
+            "4242": {}
+          }
+        }
+      }
+    },
+    "valid": false,
+    "error_code": "invalid_request",
+    "operation": "jvm.list"
+  },
+  {
+    "name": "jvm list with process schema",
+    "kind": "result",
+    "input": {
+      "protocol_version": "v1",
+      "request_id": "req-1",
+      "result": {
+        "schema": {
+          "name": "spectra.process.list",
+          "version": 1
+        },
+        "spectra_version": "1.0",
+        "data": {
+          "processes": []
+        }
+      }
+    },
+    "valid": false,
+    "error_code": "incompatible_spectra",
+    "operation": "jvm.list"
+  },
+  {
+    "name": "process list future version",
+    "kind": "result",
+    "input": {
+      "protocol_version": "v1",
+      "request_id": "req-1",
+      "result": {
+        "schema": {
+          "name": "spectra.process.list",
+          "version": 2
+        },
+        "spectra_version": "1.0",
+        "data": {
+          "processes": []
+        }
+      }
+    },
+    "valid": false,
+    "error_code": "incompatible_spectra",
+    "operation": "process.list"
   }
 ]

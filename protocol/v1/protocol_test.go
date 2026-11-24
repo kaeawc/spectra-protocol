@@ -12,6 +12,8 @@ func TestRequestValidate(t *testing.T) {
 		{"version", Request{ProtocolVersion: "v2", RequestID: "req-1", Operation: OperationHealth}, true},
 		{"request id", Request{ProtocolVersion: Version, Operation: OperationHealth}, true},
 		{"operation", Request{ProtocolVersion: Version, RequestID: "req-1"}, true},
+		{"process list", Request{ProtocolVersion: Version, RequestID: "req-1", Operation: OperationProcessList}, false},
+		{"jvm list", Request{ProtocolVersion: Version, RequestID: "req-1", Operation: OperationJVMList}, false},
 		{"negative timeout", Request{ProtocolVersion: Version, RequestID: "req-1", Operation: OperationHealth, TimeoutMS: -1}, true},
 	}
 	for _, tc := range tests {
