@@ -17,6 +17,8 @@ const (
 	OperationHealth         Operation = "health"
 	OperationInspect        Operation = "inspect"
 	OperationSnapshotCreate Operation = "snapshot.create"
+	OperationProcessList    Operation = "process.list"
+	OperationJVMList        Operation = "jvm.list"
 )
 
 var errUnsupportedProtocolVersion = errors.New("unsupported protocol version")
@@ -153,3 +155,11 @@ type InspectParams struct {
 type SnapshotCreateParams struct {
 	IncludeApps bool `json:"include_apps"`
 }
+
+// ProcessListParams is the parameter payload for OperationProcessList. It has
+// no fields; an agent rejects any supplied parameter as unknown.
+type ProcessListParams struct{}
+
+// JVMListParams is the parameter payload for OperationJVMList. It has no
+// fields; an agent rejects any supplied parameter as unknown.
+type JVMListParams struct{}
